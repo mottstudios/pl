@@ -213,13 +213,16 @@
     margin: -12px 0 20px;
   }
 
+  /* Compact draggable row — screen only. Print restores the big centered
+     card layout below, since the drag handle and small thumbnail are a
+     screen-editing affordance, not something worth putting on paper. */
   .entry {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
-    gap: 14px;
-    padding: 32px 0;
+    text-align: left;
+    gap: 12px;
+    padding: 10px 6px;
     border-bottom: 3px solid var(--fg);
   }
 
@@ -227,47 +230,85 @@
     border-top: 3px solid var(--fg);
   }
 
+  .entry.dragging {
+    opacity: 0.35;
+  }
+
+  .entry.drag-over {
+    box-shadow: inset 0 3px 0 0 var(--fg);
+  }
+
+  .handle {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--fg);
+    opacity: 0.5;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .handle:active {
+    cursor: grabbing;
+  }
+
   .entry-head {
     display: flex;
     align-items: baseline;
-    justify-content: center;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 8px;
+    flex: 0 0 auto;
   }
 
   .entry-rank {
     font-family: "Montserrat", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 44px;
+    font-size: 20px;
     font-weight: 800;
     line-height: 1;
     font-variant-numeric: tabular-nums;
+    width: 28px;
+    flex: 0 0 auto;
   }
 
   .entry-name {
     font-family: "Montserrat", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 22px;
+    font-size: 15px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    text-wrap: balance;
   }
 
   .entry img.big {
-    width: 100%;
-    max-width: 440px;
-    border: 3px solid var(--fg);
-    border-radius: 12px;
+    width: 76px;
+    height: 114px;
+    flex: 0 0 auto;
+    border: 2px solid var(--fg);
+    border-radius: 8px;
     object-fit: cover;
+    pointer-events: none;
+  }
+
+  .entry-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .note {
     width: 100%;
-    max-width: 440px;
-    min-height: 76px;
+    min-height: 44px;
     border: 2px solid var(--fg);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     font-family: "Montserrat", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--fg);
     background: var(--bg);
@@ -285,9 +326,40 @@
   }
 
   @media print {
-    .toolbar, .pdf-hint { display: none !important; }
+    .toolbar, .pdf-hint, .drag-hint { display: none !important; }
     .status, .hint { display: none !important; }
     .note { display: none !important; }
+    .handle { display: none !important; }
+
+    /* Restore the big centered one-kit-per-block layout for the paper
+       copy — the compact draggable row above is a screen-only affordance. */
+    .entry {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+      padding: 32px 0;
+    }
+    .entry-head {
+      justify-content: center;
+    }
+    .entry-rank {
+      font-size: 44px;
+      width: auto;
+    }
+    .entry-name {
+      font-size: 22px;
+    }
+    .entry img.big {
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+      border-width: 3px;
+      border-radius: 12px;
+    }
+    .entry-info {
+      align-items: center;
+    }
     .print-note {
       display: block;
       width: 100%;
@@ -331,6 +403,16 @@
     .toolbar {
       position: static !important;
     }
+  }
+
+  .drag-hint {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.55;
+    margin: -8px 0 16px;
   }
 
   .visually-hidden {
@@ -591,10 +673,57 @@
     pdfHint.textContent = "If saving fails, use Ctrl/Cmd+P and choose Save as PDF instead";
     wrap.appendChild(pdfHint);
 
+    var dragHint = document.createElement("div");
+    dragHint.className = "drag-hint";
+    dragHint.textContent = "Drag ⠿ to reorder";
+    wrap.appendChild(dragHint);
+
+    // Reorders state.finalOrder by moving the item at display position
+    // fromRevIdx to display position toRevIdx, where display position 0 is
+    // rank 20 (top of the list) and counts down to rank 1 at the bottom —
+    // the reverse of finalOrder's own best-to-worst order.
+    function moveEntry(fromRevIdx, toRevIdx) {
+      var displayOrder = state.finalOrder.slice().reverse();
+      var moved = displayOrder.splice(fromRevIdx, 1)[0];
+      displayOrder.splice(toRevIdx, 0, moved);
+      state.finalOrder = displayOrder.reverse();
+      saveState();
+      renderResults();
+    }
+
     var total = state.finalOrder.length;
     state.finalOrder.slice().reverse().forEach(function (id, revIdx) {
       var entry = document.createElement("div");
       entry.className = "entry";
+
+      entry.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        entry.classList.add("drag-over");
+      });
+      entry.addEventListener("dragleave", function () {
+        entry.classList.remove("drag-over");
+      });
+      entry.addEventListener("drop", function (e) {
+        e.preventDefault();
+        entry.classList.remove("drag-over");
+        var fromIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (!isNaN(fromIdx) && fromIdx !== revIdx) moveEntry(fromIdx, revIdx);
+      });
+
+      var handle = document.createElement("div");
+      handle.className = "handle";
+      handle.textContent = "⠿";
+      handle.draggable = true;
+      handle.setAttribute("aria-hidden", "true");
+      handle.addEventListener("dragstart", function (e) {
+        e.dataTransfer.setData("text/plain", String(revIdx));
+        e.dataTransfer.effectAllowed = "move";
+        entry.classList.add("dragging");
+      });
+      handle.addEventListener("dragend", function () {
+        entry.classList.remove("dragging");
+      });
 
       var head = document.createElement("div");
       head.className = "entry-head";
@@ -613,13 +742,16 @@
       var img = document.createElement("img");
       img.className = "big";
       img.src = TEAMS[id].img;
-      img.alt = TEAMS[id].name + " away kit";
+      img.alt = TEAMS[id].name + " home kit";
+
+      var info = document.createElement("div");
+      info.className = "entry-info";
 
       var note = document.createElement("textarea");
       note.className = "note";
       note.placeholder = "Add your notes…";
       note.value = state.notes[id] || "";
-      note.rows = 3;
+      note.rows = 2;
 
       var printNote = document.createElement("div");
       printNote.className = "print-note";
@@ -631,10 +763,13 @@
         saveState();
       });
 
-      entry.appendChild(head);
+      info.appendChild(head);
+      info.appendChild(note);
+      info.appendChild(printNote);
+
+      entry.appendChild(handle);
       entry.appendChild(img);
-      entry.appendChild(note);
-      entry.appendChild(printNote);
+      entry.appendChild(info);
       wrap.appendChild(entry);
     });
 
