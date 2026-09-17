@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premier League: Find Your Match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap">
+<style>
+  :root {
+    --pl-purple: #37003c;
+    --pl-purple-2: #24002a;
+    --pl-green: #00ff87;
+    --pl-pink: #e90052;
+    --pl-cyan: #04f5ff;
+    --card: #ffffff;
+    --ink: #1a0020;
+    --muted: #6b5a70;
+    --line: #e7e0e9;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--pl-purple);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: Montserrat, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(1100px 620px at 12% -6%, #4d0055 0%, rgba(77,0,85,0) 62%),
+      radial-gradient(900px 560px at 92% 4%, #2b0a4a 0%, rgba(43,10,74,0) 60%),
+      var(--pl-purple);
+    background-attachment: fixed;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 18px 16px 64px;
+  }
+
+  /* ---------- masthead ---------- */
+  .mast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+
+  .mast img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    flex: 0 0 auto;
+  }
+
+  .mast-txt {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    opacity: 0.72;
+  }
+
+  h1 {
+    margin: 0 0 14px;
+    color: #fff;
+    font-size: clamp(30px, 8vw, 52px);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  h1 .hl { color: var(--pl-green); }
+
+  .lede {
+    color: #e5d5ea;
+    font-size: 16px;
+    line-height: 1.62;
+    font-weight: 500;
+    margin: 0 0 12px;
+  }
+
+  .fine {
+    color: #b79cbe;
+    font-size: 12.5px;
+    line-height: 1.6;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+
+  .btn-go {
+    background: var(--pl-green);
+    color: #04231a;
+    font-size: 15px;
+    padding: 17px 38px;
+    margin-top: 26px;
+    box-shadow: 0 10px 0 -4px rgba(0,255,135,0.25);
+  }
+
+  .btn-go:hover { transform: translateY(-2px); }
+  .btn-go:active { transform: translateY(1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    font-size: 12.5px;
+    padding: 13px 26px;
+  }
+
+  .btn-ghost:hover { border-color: var(--pl-green); color: var(--pl-green); }
+
+  /* ---------- progress ---------- */
+  .prog-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    color: #cbb3d1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+
+  .prog-row b { color: var(--pl-green); font-variant-numeric: tabular-nums; }
+
+  .track {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.14);
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+
+  .fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--pl-cyan), var(--pl-green));
+    border-radius: 999px;
+    transition: width .32s cubic-bezier(.22,1,.36,1);
+  }
+
+  /* ---------- question ---------- */
+  .qnum {
+    color: var(--pl-cyan);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .qtext {
+    color: #fff;
+    font-size: clamp(21px, 5.4vw, 29px);
+    font-weight: 800;
+    line-height: 1.24;
+    letter-spacing: -0.01em;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+
+  .opts { display: grid; gap: 11px; }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.13);
+    border-radius: 15px;
+    padding: 16px 18px;
+    color: #f4ebf6;
+    font-family: inherit;
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    cursor: pointer;
+    transition: background .13s ease, border-color .13s ease, transform .13s ease;
+  }
+
+  .opt:hover {
+    background: rgba(0,255,135,0.09);
+    border-color: var(--pl-green);
+    transform: translateX(3px);
+  }
+
+  .opt .key {
+    flex: 0 0 auto;
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.11);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .opt:hover .key { background: var(--pl-green); color: #04231a; }
+
+  .back {
+    appearance: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: #b79cbe;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 18px 2px 0;
+  }
+
+  .back:hover { color: #fff; }
+
+  /* ---------- calculating ---------- */
+  .calc { text-align: center; padding: 60px 0; }
+
+  .calc p {
+    color: #e5d5ea;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    min-height: 24px;
+  }
+
+  .spinner {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 26px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: var(--pl-green);
+    animation: spin .8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- results ---------- */
+  .kicker {
+    display: inline-block;
+    background: var(--pl-green);
+    color: #04231a;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+
+  .kicker.alt {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 30px 26px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  }
+
+  .card.runner { padding: 26px 24px; }
+
+  .crest {
+    display: block;
+    margin: 0 auto 18px;
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+  }
+
+  .card.runner .crest { width: 92px; height: 92px; margin-bottom: 14px; }
+
+  .team {
+    text-align: center;
+    font-size: clamp(27px, 7vw, 40px);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+
+  .card.runner .team { font-size: clamp(20px, 5vw, 27px); }
+
+  .score {
+    text-align: center;
+    color: var(--pl-pink);
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 20px;
+  }
+
+  .blurb {
+    font-size: 15.5px;
+    line-height: 1.66;
+    font-weight: 500;
+    color: #3a2740;
+    margin: 0 0 20px;
+  }
+
+  .card.runner .blurb { font-size: 14.5px; }
+
+  .ev-h {
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 18px;
+    border-top: 1.5px solid var(--line);
+    margin-bottom: 12px;
+  }
+
+  ul.ev { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+
+  ul.ev li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 600;
+    color: #4a3350;
+  }
+
+  ul.ev li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    background: var(--pl-green);
+  }
+
+  .card.runner ul.ev li::before { background: var(--pl-cyan); }
+
+  .vs {
+    text-align: center;
+    color: #b79cbe;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 26px 0 14px;
+  }
+
+  /* ---------- trait readout ---------- */
+  .traits {
+    margin-top: 26px;
+    background: rgba(255,255,255,0.055);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 22px 22px 24px;
+  }
+
+  .traits h3 {
+    margin: 0 0 18px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .trait { margin-bottom: 15px; }
+  .trait:last-child { margin-bottom: 0; }
+
+  .trait-row {
+    display: flex;
+    justify-content: space-between;
+    color: #e5d5ea;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .trait-row span:last-child { color: var(--pl-green); font-variant-numeric: tabular-nums; }
+
+  .bar {
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.13);
+    overflow: hidden;
+  }
+
+  .bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--pl-cyan), var(--pl-green));
+    transition: width .7s cubic-bezier(.22,1,.36,1);
+  }
+
+  .foot { text-align: center; margin-top: 30px; }
+
+  .fade { animation: fade .34s ease both; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 420px) {
+    .opt { font-size: 14.5px; padding: 14px 15px; gap: 11px; }
+    .card { padding: 26px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mast">
+    <img src="premier-league-logos/premier-league.png" alt="Premier League">
+    <div class="mast-txt">Premier League<br>Find Your Match</div>
+  </div>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   AXES  [G, F, H, C, V, S]
+   G grandeur · F flair · H nostalgia · C sociability
+   V chaos · S stubbornness
+   ============================================================ */
+
+const AXES = [
+  { key: "G", label: "Grandeur" },
+  { key: "F", label: "Flair" },
+  { key: "H", label: "Nostalgia" },
+  { key: "C", label: "Sociability" },
+  { key: "V", label: "Chaos" },
+  { key: "S", label: "Stubbornness" }
+];
+
+/* ---- ROUND 1 ---------------------------------------------------------- */
+const SET_A = [
+  {
+    q: "One thing in your fridge has been there too long. What is it?",
+    opts: [
+      { t: "A jar of something pickled", w: [0,0,2,0,-1,2],
+        e: "a jar of something pickled has outlived two governments in your fridge" },
+      { t: "Half a birthday cake", w: [0,1,0,2,0,0],
+        e: "you kept half a birthday cake on the off-chance somebody came round" },
+      { t: "Three takeout containers you swear you'll eat", w: [-1,0,0,0,2,1],
+        e: "you are still holding three takeout containers you fully intend to eat" },
+      { t: "Nothing — you clear it out on Sundays", w: [1,-1,-2,0,-2,0],
+        e: "your fridge gets cleared out on Sundays, no exceptions" }
+    ]
+  },
+  {
+    q: "A stranger on a long train ride starts talking before you've got your headphones in.",
+    opts: [
+      { t: "Great — you talk the whole way", w: [0,0,0,3,1,0],
+        e: "you would talk to a stranger for four hours and enjoy it" },
+      { t: "Polite for ten minutes, then the book comes out", w: [0,1,1,-1,0,0],
+        e: "you give a stranger ten polite minutes and then the book comes out" },
+      { t: "One-word answers until they stop", w: [0,-2,0,-1,0,2],
+        e: "you answer in one word until they stop" },
+      { t: "You'd already moved seats when they sat down", w: [1,1,0,-3,-1,0],
+        e: "you had already changed seats before they sat down" }
+    ]
+  },
+  {
+    q: "Pick one you'd want to run your hand across.",
+    opts: [
+      { t: "Corduroy", w: [0,1,3,0,-1,0], e: "you chose corduroy" },
+      { t: "Cold stainless steel", w: [2,1,-3,0,-2,0], e: "you went for cold stainless steel" },
+      { t: "Wet clay", w: [-2,2,0,0,2,0], e: "you reached for wet clay" },
+      { t: "A dog's ear", w: [0,-1,0,2,0,2], e: "you reached for a dog's ear" }
+    ]
+  },
+  {
+    q: "It's 2am and you're wide awake. What's happening?",
+    opts: [
+      { t: "You're finishing something", w: [2,0,0,0,-1,2],
+        e: "at 2am you are finishing something" },
+      { t: "You're relitigating a conversation from 2011", w: [0,0,3,-1,1,3],
+        e: "you are still relitigating a conversation from 2011" },
+      { t: "It's just your normal biphasic sleep cycle", w: [0,2,1,-2,-1,0],
+        e: "you describe being up at 2am as your normal biphasic sleep cycle" },
+      { t: "You're out, and it's going well", w: [1,0,0,3,3,-2],
+        e: "you are out at 2am and it is going well" }
+    ]
+  },
+  {
+    q: "You're given a shed at the back of the yard. First move?",
+    opts: [
+      { t: "Clear it out properly before anything else", w: [0,-1,1,0,-2,2],
+        e: "you would clear the shed out properly before anything else" },
+      { t: "Fill it immediately", w: [0,0,1,1,2,1], e: "you would fill the shed immediately" },
+      { t: "Put a chair and a radio in it", w: [0,2,2,-1,0,1],
+        e: "a chair and a radio was all the shed needed" },
+      { t: "Sell the shed", w: [2,0,-3,-2,0,0], e: "you would sell the shed" }
+    ]
+  },
+  {
+    q: "Which chore do you secretly not mind?",
+    opts: [
+      { t: "Ironing", w: [0,2,2,0,-2,0], e: "you do not mind ironing" },
+      { t: "Washing dishes by hand", w: [-2,-1,2,0,0,3], e: "you wash dishes by hand on purpose" },
+      { t: "Mowing", w: [1,0,0,1,-1,1], e: "mowing is the one you do not mind" },
+      { t: "Vacuuming", w: [1,-1,0,0,1,0], e: "vacuuming is the one you do not mind" }
+    ]
+  },
+  {
+    q: "Board game night. You're losing badly with twenty minutes left.",
+    opts: [
+      { t: "You play it out properly", w: [0,0,1,0,-2,3],
+        e: "you play a lost game out properly to the end" },
+      { t: "You start playing for spite — take someone down with you", w: [0,-1,0,1,3,2],
+        e: "when you are losing you start playing for spite" },
+      { t: "You go quiet", w: [0,0,0,-2,-1,1], e: "you go quiet when it is going badly" },
+      { t: "You announce you never liked this game", w: [1,0,0,0,1,-3],
+        e: "you announced you never liked the game anyway" }
+    ]
+  },
+  {
+    q: "Worst seat at a wedding:",
+    opts: [
+      { t: "Next to the speakers", w: [0,0,0,2,-1,0],
+        e: "sitting next to the speakers would have ruined the whole night" },
+      { t: "The table where everyone already knows each other", w: [-1,0,0,2,1,-1],
+        e: "the table where everyone already knows each other is your nightmare" },
+      { t: "Facing away from the head table", w: [2,1,1,0,0,0],
+        e: "you need to be facing the head table" },
+      { t: "Next to someone who wants to talk about their business", w: [-2,2,1,-1,0,0],
+        e: "you would sooner sit by the speakers than next to someone pitching their business" }
+    ]
+  },
+  {
+    q: "A breakfast that isn't breakfast:",
+    opts: [
+      { t: "Cold pizza", w: [0,0,-1,1,2,0], e: "cold pizza counts as breakfast" },
+      { t: "Last night's Chinese food", w: [0,1,2,0,0,2], e: "last night's Chinese food counts as breakfast" },
+      { t: "A bag of chips", w: [-2,-2,0,0,2,1], e: "a bag of chips counts as breakfast" },
+      { t: "Soup", w: [1,2,2,-1,0,0], e: "you said soup" }
+    ]
+  },
+  {
+    q: "You find $20 in an old coat.",
+    opts: [
+      { t: "It goes back in the coat for next time", w: [0,0,3,-1,-1,2],
+        e: "the $20 went back in the coat for next time" },
+      { t: "Spent within the hour", w: [1,0,0,2,3,-1], e: "the $20 was gone within the hour" },
+      { t: "Straight into the account it came out of", w: [2,-1,-1,0,-3,0],
+        e: "the $20 went straight back into the account" },
+      { t: "You tell everyone about it for a week", w: [0,-1,0,3,1,0],
+        e: "you told everyone about the $20 for a week" }
+    ]
+  },
+  {
+    q: "Which would you least mind being woken by?",
+    opts: [
+      { t: "Church bells", w: [1,2,3,-1,0,0], e: "you would take church bells" },
+      { t: "Songbirds", w: [-2,0,1,-1,1,2], e: "you would take songbirds" },
+      { t: "A lawnmower two yards over", w: [0,-1,0,1,-2,2],
+        e: "a lawnmower two yards over would do fine" },
+      { t: "Somebody else already up and making coffee", w: [0,0,0,3,-1,1],
+        e: "you wanted somebody already up and making the coffee" }
+    ]
+  },
+  {
+    q: "The plan collapses an hour before.",
+    opts: [
+      { t: "You had a backup before it collapsed", w: [2,1,0,0,-3,1],
+        e: "you had a backup ready before the plan collapsed" },
+      { t: "You're relieved", w: [0,1,1,-2,-1,0], e: "you were relieved when the plan collapsed" },
+      { t: "You fix it — you're already on the phone", w: [1,0,0,2,1,2],
+        e: "you were on the phone fixing it inside a minute" },
+      { t: "You go anyway, alone if you have to", w: [-2,0,2,-1,2,3],
+        e: "you went anyway, alone if you had to" }
+    ]
+  }
+];
+
+/* ---- ROUND 2 ---------------------------------------------------------- */
+const SET_B = [
+  {
+    q: "First thing you do in a hotel room?",
+    opts: [
+      { t: "Unpack properly, into the drawers", w: [0,0,2,0,-2,2],
+        e: "you unpack properly into the hotel drawers" },
+      { t: "Open every door and cabinet to see what's in them", w: [0,2,0,0,1,0],
+        e: "you open every cabinet in a hotel room just to see" },
+      { t: "Lie down on the bed with your coat still on", w: [0,-1,0,-1,1,1],
+        e: "you lay down on the bed with your coat still on" },
+      { t: "Find the thermostat and fix it", w: [2,1,0,0,-2,1],
+        e: "the thermostat was the first thing you went for" }
+    ]
+  },
+  {
+    q: "What's in your glove compartment?",
+    opts: [
+      { t: "The manual, the registration, nothing else", w: [1,1,-1,0,-3,0],
+        e: "your glove compartment holds the manual, the registration and nothing else" },
+      { t: "Napkins from six different restaurants", w: [0,0,1,1,2,1],
+        e: "there are napkins from six restaurants in your glove compartment" },
+      { t: "Something you've been meaning to return", w: [0,0,2,-1,1,2],
+        e: "something you have been meaning to return is still in the car" },
+      { t: "You genuinely don't know", w: [-2,-2,0,1,2,0],
+        e: "you genuinely do not know what is in your glove compartment" }
+    ]
+  },
+  {
+    q: "Alone in the house. What's on in the background?",
+    opts: [
+      { t: "A ballgame, turned down low", w: [0,0,2,2,0,1],
+        e: "you want a ballgame on low in an empty house" },
+      { t: "Rain on the window", w: [0,2,1,-2,-1,0],
+        e: "rain on the window was the sound you wanted" },
+      { t: "The dishwasher running", w: [1,-1,0,0,-2,2],
+        e: "the dishwasher running was the sound you wanted" },
+      { t: "Nothing. Silence.", w: [0,1,0,-3,-1,2],
+        e: "you wanted silence, and you meant it" }
+    ]
+  },
+  {
+    q: "Somebody's organizing a group photo.",
+    opts: [
+      { t: "You're the one organizing it", w: [2,0,0,2,-1,1],
+        e: "you are the one who organizes the group photo" },
+      { t: "Back row, on the edge, half behind someone", w: [-2,1,0,-2,0,1],
+        e: "you stand back row, on the edge, half behind somebody else" },
+      { t: "You'll be in it, but you're not enjoying it", w: [0,0,0,-1,-1,1],
+        e: "you will be in the photo but you are not enjoying it" },
+      { t: "You do something with your face", w: [0,-1,0,1,3,-1],
+        e: "you do something with your face in group photos" }
+    ]
+  },
+  {
+    q: "You inherit one thing from a relative you barely knew. You keep:",
+    opts: [
+      { t: "A working clock that runs slightly fast", w: [0,1,3,0,-1,2],
+        e: "you kept a clock that runs slightly fast" },
+      { t: "A box of photographs of strangers", w: [-2,2,2,2,0,0],
+        e: "you kept a box of photographs of people you will never identify" },
+      { t: "A very good coat", w: [2,2,1,-1,0,0], e: "you kept the very good coat" },
+      { t: "A toolbox", w: [-1,-2,0,1,0,3], e: "you kept the toolbox" }
+    ]
+  },
+  {
+    q: "You're in line and the person ahead of you is taking forever.",
+    opts: [
+      { t: "You switch lines", w: [1,1,0,0,1,-2], e: "you switch lines" },
+      { t: "You wait. It's fine.", w: [0,0,0,1,-2,3], e: "you wait, and it is genuinely fine" },
+      { t: "You're doing math on which line you should have picked", w: [2,1,0,-2,-1,1],
+        e: "you were doing math on which line you should have picked" },
+      { t: "You start talking to them", w: [0,0,0,3,1,1],
+        e: "you started talking to the person holding up the line" }
+    ]
+  },
+  {
+    q: "A house should smell like:",
+    opts: [
+      { t: "Woodsmoke", w: [0,2,3,-1,0,1], e: "you chose woodsmoke" },
+      { t: "Chlorine", w: [1,1,-2,1,1,0], e: "you chose chlorine" },
+      { t: "Bread", w: [0,-1,2,3,0,1], e: "you chose bread" },
+      { t: "Nothing at all", w: [2,1,-1,-2,-3,0], e: "you wanted a house to smell like nothing at all" }
+    ]
+  },
+  {
+    q: "You find a photo of yourself from fifteen years ago.",
+    opts: [
+      { t: "You look at it for a long time", w: [0,0,3,-1,-1,2],
+        e: "you looked at a fifteen-year-old photo of yourself for a long time" },
+      { t: "You send it to somebody immediately", w: [0,-1,0,3,2,0],
+        e: "you sent the old photo to somebody within the minute" },
+      { t: "You'd forgotten that jacket", w: [1,2,2,0,0,0],
+        e: "what you noticed in the old photo was the jacket" },
+      { t: "You put it back face down", w: [-1,-1,0,-2,-1,1],
+        e: "you put the photo back face down" }
+    ]
+  },
+  {
+    q: "The restaurant you'd go back to:",
+    opts: [
+      { t: "The one where they already know your order", w: [-2,0,3,1,-2,3],
+        e: "you go back to the place where they already know your order" },
+      { t: "The one that's hard to get into", w: [3,2,-2,0,1,0],
+        e: "you go back to the one that is hard to get into" },
+      { t: "The one with terrible lighting and great food", w: [-2,-1,1,1,0,2],
+        e: "terrible lighting is a fair price for great food" },
+      { t: "The one where you can hear yourself talk", w: [1,2,0,2,-2,0],
+        e: "you go back to the one where you can hear yourself talk" }
+    ]
+  },
+  {
+    q: "You have to learn one instrument, starting Monday.",
+    opts: [
+      { t: "Drums", w: [0,-1,0,2,3,1], e: "you picked drums" },
+      { t: "Piano", w: [2,2,1,0,0,1], e: "you picked piano" },
+      { t: "Something with strings you can carry", w: [-2,2,2,1,0,0],
+        e: "you picked something with strings you could carry" },
+      { t: "You'd negotiate your way out of it", w: [1,-1,0,-1,1,-2],
+        e: "you would negotiate your way out of the lessons" }
+    ]
+  },
+  {
+    q: "You're handed a free hour in the middle of a Tuesday.",
+    opts: [
+      { t: "You sleep", w: [0,-1,0,-2,-1,1], e: "you would spend the free hour asleep" },
+      { t: "You do the thing you've been avoiding", w: [2,0,0,0,-1,3],
+        e: "you spent the free hour on the thing you had been avoiding" },
+      { t: "You go outside with no plan", w: [-2,2,1,-1,2,0],
+        e: "you went outside with no plan at all" },
+      { t: "You call someone", w: [0,0,1,3,0,1], e: "you used the free hour to call somebody" }
+    ]
+  },
+  {
+    q: "Something breaks at home.",
+    opts: [
+      { t: "You fix it yourself, badly, and it holds for years", w: [-2,-2,2,0,1,3],
+        e: "you fixed it yourself, badly, and it has held for years" },
+      { t: "You fix it yourself, properly, and it takes all weekend", w: [1,2,1,0,-2,2],
+        e: "you fixed it properly and it took the whole weekend" },
+      { t: "You call somebody the same day", w: [2,1,-2,2,-1,0],
+        e: "you called somebody the same day" },
+      { t: "You live with it", w: [-2,-1,1,-1,1,2], e: "you simply live with it" }
+    ]
+  }
+];
+
+const QUESTION_SETS = [SET_A, SET_B];
+
+/* ---------- the club (fixed) ---------- */
+const HULL = {
+  name: "Hull City",
+  logo: "premier-league-logos/hull-city-large.svg",
+  blurbs: [
+    "You're drawn to the Tigers. Like you, they are fiercely loyal, creative, and never " +
+    "predictable. They're champions <i>and</i> underdogs, which to you makes perfect sense. " +
+    "You appreciate a team with something to prove, a sense of humor, and enough grit to " +
+    "keep surprising people.",
+
+    "You keep finding your way back to the Tigers. You've got a stubborn streak you'd " +
+    "probably call something nicer, and so do they — a club counted out often enough to " +
+    "stop taking it personally. You don't mind a little chaos, provided it's on your own " +
+    "terms. Neither do they.",
+
+    "The Tigers suit you. You're harder to read than people assume: warm with the ones who " +
+    "have earned it, and quietly unbothered by the ones who haven't. Amber and black is a " +
+    "loud choice made in a understated way, which is more or less how you do everything.",
+
+    "You and the Tigers want the same thing — to be underestimated, briefly, and then not. " +
+    "You hold on to things longer than you let on, you'd far rather earn it than be handed " +
+    "it, and you have a soft spot for anyone who just keeps showing up. They keep " +
+    "showing up.",
+
+    "Hull makes sense for you. You're loyal without being sentimental about it, you can " +
+    "find the funny side of a bad day, and you'll take the interesting result over the safe " +
+    "one nearly every time. The Tigers have never once taken the safe one."
+  ]
+};
+
+/* ---------- the field ---------- */
+const TEAMS = [
+  { name: "Arsenal", logo: "arsenal.svg", v: [3,3,2,1,1,0],
+    blurb: "Beautiful or not at all. You would rather lose doing the right thing than win scruffily, and you have firm opinions about how a thing should look before it is anywhere near finished." },
+  { name: "Aston Villa", logo: "aston-villa.svg", v: [1,1,3,2,0,2],
+    blurb: "Old money, quietly. You take the long view, you know exactly what the place used to be, and you are perfectly content to wait for it to come round again." },
+  { name: "AFC Bournemouth", logo: "bournemouth.svg", v: [-3,1,-2,0,-1,-1],
+    blurb: "Small, sunny and genuinely unbothered by what the big ones are doing. You measure a good day by whether you enjoyed it, not by where it left you in the table." },
+  { name: "Brentford", logo: "brentford-fc.svg", v: [-2,1,-1,1,-1,0],
+    blurb: "You found a smarter way of doing it and told nobody. No fuss, no shouting — a quiet system that works better than everyone else's and a small crowd that knows it." },
+  { name: "Brighton & Hove Albion", logo: "brighton-and-hove-albion.svg", v: [-1,2,-2,0,-1,0],
+    blurb: "Good taste, good weather, no particular hurry. You like the well-made version of things and you would rather build something interesting than something loud." },
+  { name: "Chelsea", logo: "chelsea-fc.svg", v: [3,1,-1,-1,3,-2],
+    blurb: "You want it now, you will tear up the whole plan to get it, and you will tear it up again next month. Ruthless and fashionable, occasionally at your own expense." },
+  { name: "Coventry City", logo: "coventry-city-fc.svg", v: [-2,-1,2,2,1,3],
+    blurb: "You have been through enough with a place to have earned the right to complain about it. Sentimental, stubborn, and still turning up." },
+  { name: "Crystal Palace", logo: "crystal-palace-fc.svg", v: [-1,2,1,3,2,2],
+    blurb: "Loud, funny, and considerably better organised than you let on. You are at your best inside a crowd that is making noise together." },
+  { name: "Everton", logo: "everton.svg", v: [0,-2,3,2,2,3],
+    blurb: "Suffering as a personality trait, and you would not have it any other way. Deep roots, long grudges, absolute refusal to leave." },
+  { name: "Fulham", logo: "fulham-fc.svg", v: [0,2,1,-2,-2,0],
+    blurb: "Civilised. You like a handsome building, a river view and being left alone, and you are not especially interested in anyone else's table." },
+  { name: "Ipswich Town", logo: "ipswitch-town.svg", v: [-3,-1,3,2,-1,2],
+    blurb: "Quiet, rural, unbothered, and far older than people assume. Long memory, very small circle, nothing to prove to anybody." },
+  { name: "Leeds United", logo: "leeds-united-fc.svg", v: [1,-1,3,2,3,3],
+    blurb: "Everything at full volume. You do not do moderation, you keep every grudge on file, and the people who love you knew exactly what they were signing up for." },
+  { name: "Liverpool", logo: "liverpool-fc.svg", v: [3,2,3,3,1,2],
+    blurb: "Heritage and noise in equal measure. You believe in the group, you will sing about it, and you take all of it extremely personally." },
+  { name: "Manchester City", logo: "manchester-city-fc.svg", v: [3,3,-2,-1,-2,-1],
+    blurb: "Everything optimised, nothing wasted. Your fridge is clean, your systems work, and you are privately amused by people still doing it the hard way." },
+  { name: "Manchester United", logo: "manchester-united-fc.svg", v: [3,1,2,0,3,-1],
+    blurb: "Enormous, dramatic, permanently mid-saga. Whatever mood you happen to be in, everybody within range hears about it." },
+  { name: "Newcastle United", logo: "newcastle-united.svg", v: [2,1,2,3,3,2],
+    blurb: "Total commitment to a place and a feeling, results be damned. You would take your coat off in January purely to prove a point." },
+  { name: "Nottingham Forest", logo: "nottingham-forest.svg", v: [0,1,3,1,2,1],
+    blurb: "One glorious thing happened and you have quite reasonably never stopped mentioning it. Trees, tradition, and a stubborn sense of your own history." },
+  { name: "Sunderland", logo: "sunderland-afc.svg", v: [-2,-2,2,3,1,3],
+    blurb: "Hard-wearing, unglamorous, deeply loyal. You stayed through the bad years because leaving was never once on the table." },
+  { name: "Tottenham Hotspur", logo: "tottingham-hotspur.svg", v: [2,3,1,0,3,1],
+    blurb: "Style, flair and an unshakeable capacity for self-sabotage. You would rather do it the exciting way and deal with the wreckage afterwards." }
+];
+
+/* ============================================================ */
+
+const app = document.getElementById("app");
+let step = -1;           // -1 intro, 0..n-1 questions, n calculating, n+1 results
+let answers = [];        // index per question
+let round = 0;           // 0 = SET_A, 1 = SET_B, then it alternates
+let QUESTIONS = QUESTION_SETS[0];
+
+const D = 6;
+function dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
+function mag(a) { return Math.sqrt(dot(a, a)); }
+
+/* --- calibration, computed once from the data above ---------------------
+   The hand-written weights carry a net bias (most options lean nostalgic
+   and stubborn), which parks every result on whichever club sits nearest
+   the average. So: centre each question so its four options cancel out,
+   then whiten both sides per axis so no single axis dominates the match. */
+
+let CW, SIG;
+
+function calibrate() {                                // re-run whenever the round changes
+  CW = QUESTIONS.map(q => {                           // centred option weights
+    const m = Array(D).fill(0);
+    q.opts.forEach(o => o.w.forEach((x, i) => { m[i] += x / q.opts.length; }));
+    return q.opts.map(o => o.w.map((x, i) => x - m[i]));
+  });
+
+  const s = Array(D).fill(0);                         // per-axis spread of a profile
+  CW.forEach(qs => {
+    for (let i = 0; i < D; i++) {
+      let v = 0;
+      qs.forEach(w => { v += (w[i] * w[i]) / qs.length; });
+      s[i] += v;
+    }
+  });
+  SIG = s.map(x => Math.sqrt(x) || 1);
+}
+
+const TV = (() => {                                   // centred + whitened club vectors
+  const m = Array(D).fill(0);
+  TEAMS.forEach(t => t.v.forEach((x, i) => { m[i] += x / TEAMS.length; }));
+  const c = TEAMS.map(t => t.v.map((x, i) => x - m[i]));
+  const sd = Array(D).fill(0);
+  c.forEach(v => v.forEach((x, i) => { sd[i] += (x * x) / TEAMS.length; }));
+  const sdr = sd.map(x => Math.sqrt(x) || 1);
+  return c.map(v => v.map((x, i) => x / sdr[i]));
+})();
+
+function profile() {                                  // whitened, for matching
+  const p = Array(D).fill(0);
+  answers.forEach((oi, qi) => {
+    const w = CW[qi][oi];
+    for (let i = 0; i < D; i++) p[i] += w[i];
+  });
+  for (let i = 0; i < D; i++) p[i] /= SIG[i];
+  return p;
+}
+
+function rawProfile() {                               // un-whitened, for the trait bars
+  const p = Array(D).fill(0);
+  answers.forEach((oi, qi) => {
+    const w = QUESTIONS[qi].opts[oi].w;
+    for (let i = 0; i < D; i++) p[i] += w[i];
+  });
+  return p;
+}
+
+function seed() {
+  // stable pseudo-random from the answer pattern
+  let h = 7 + round * 53;
+  answers.forEach((oi, qi) => { h = (h * 31 + oi * (qi + 3) + 11) % 9973; });
+  return h;
+}
+
+function rank(p) {
+  const pm = mag(p) || 1;
+  return TEAMS
+    .map((t, k) => ({ t, v: TV[k], sim: dot(p, TV[k]) / (pm * (mag(TV[k]) || 1)) }))
+    .sort((a, b) => b.sim - a.sim);
+}
+
+/* top evidence lines, ordered by how hard each answer pulled toward a vector */
+function evidence(vec, n) {
+  return answers
+    .map((oi, qi) => {
+      const w = CW[qi][oi].map((x, i) => x / SIG[i]);
+      return { e: QUESTIONS[qi].opts[oi].e, pull: dot(w, vec) / (mag(w) || 1) };
+    })
+    .sort((a, b) => b.pull - a.pull)
+    .slice(0, n)
+    .map(x => x.e);
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ---------------- views ---------------- */
+
+function render() {
+  if (step === -1) return intro();
+  if (step < QUESTIONS.length) return question();
+  if (step === QUESTIONS.length) return calculating();
+  return results();
+}
+
+function intro() {
+  app.innerHTML = `
+    <div class="fade">
+      <h1>Find your <span class="hl">match</span></h1>
+      <p class="lede">Answer twelve questions to find the best Premier League team for you!</p>
+      <button class="btn btn-go" id="go">Start the quiz</button>
+    </div>`;
+  document.getElementById("go").onclick = () => { step = 0; render(); };
+}
+
+function question() {
+  const q = QUESTIONS[step];
+  const pct = (step / QUESTIONS.length) * 100;
+  app.innerHTML = `
+    <div class="prog-row">
+      <span>Question <b>${step + 1}</b> of ${QUESTIONS.length}</span>
+      <span>${round > 0 ? "Set " + (round + 1) + " &middot; " : ""}${Math.round(pct)}%</span>
+    </div>
+    <div class="track"><i class="fill" id="fill"></i></div>
+    <div class="fade">
+      <div class="qnum">Q${String(step + 1).padStart(2, "0")}</div>
+      <h2 class="qtext">${q.q}</h2>
+      <div class="opts">
+        ${q.opts.map((o, i) => `
+          <button class="opt" data-i="${i}">
+            <span class="key">${"ABCD"[i]}</span><span>${o.t}</span>
+          </button>`).join("")}
+      </div>
+      ${step > 0 ? '<button class="back" id="back">&larr; Back</button>' : ""}
+    </div>`;
+
+  requestAnimationFrame(() => { document.getElementById("fill").style.width = pct + "%"; });
+
+  app.querySelectorAll(".opt").forEach(b => {
+    b.onclick = () => {
+      answers[step] = +b.dataset.i;
+      step++;
+      render();
+    };
+  });
+
+  const back = document.getElementById("back");
+  if (back) back.onclick = () => { step--; render(); };
+}
+
+function calculating() {
+  const lines = [
+    "Weighting your answers…",
+    "Cross-referencing 20 club profiles…",
+    "Discounting for recency bias…",
+    "Resolving your match…"
+  ];
+  app.innerHTML = `
+    <div class="calc fade">
+      <div class="spinner"></div>
+      <p id="cline">${lines[0]}</p>
+    </div>`;
+  let i = 0;
+  const el = document.getElementById("cline");
+  const iv = setInterval(() => {
+    i++;
+    if (i < lines.length) { el.textContent = lines[i]; }
+    else { clearInterval(iv); step++; render(); }
+  }, 620);
+}
+
+function results() {
+  const prof = profile();
+  const ranked = rank(prof);
+  const runner = ranked[0].t;
+
+  const s = seed();
+  const hullPct = 96 + (s % 4);                       // 96-99
+  const runPct = Math.max(71, hullPct - 5 - (s % 9)); // always clearly behind
+
+  const hullEv = evidence(prof, 3);
+  const runAll = evidence(ranked[0].v, 12);
+  let runEv = runAll.filter(e => !hullEv.includes(e)).slice(0, 2);
+  if (!runEv.length) runEv = runAll.slice(0, 2);   // heavy overlap: show them anyway
+
+  const raw = rawProfile();
+  const traits = AXES.map((a, i) => ({
+    label: a.label,
+    pct: Math.round(((Math.max(-14, Math.min(14, raw[i])) + 14) / 28) * 100)
+  }));
+
+  app.innerHTML = `
+    <div class="fade">
+      <div class="kicker">Your club</div>
+      <div class="card">
+        <img class="crest" src="${HULL.logo}" alt="${HULL.name}">
+        <h2 class="team">${HULL.name}</h2>
+        <div class="score">${hullPct}% match</div>
+        <p class="blurb">${HULL.blurbs[Math.floor(s / 7) % HULL.blurbs.length]}</p>
+        <div class="ev-h">Why Hull</div>
+        <ul class="ev">${hullEv.map(e => `<li>${cap(e)}.</li>`).join("")}</ul>
+      </div>
+
+      <div class="vs">Runner-up</div>
+
+      <div class="kicker alt">Closest of the rest</div>
+      <div class="card runner">
+        <img class="crest" src="premier-league-logos/${runner.logo}" alt="${runner.name}">
+        <h2 class="team">${runner.name}</h2>
+        <div class="score">${runPct}% match</div>
+        <p class="blurb">${runner.blurb}</p>
+        <div class="ev-h">What tipped it</div>
+        <ul class="ev">${runEv.map(e => `<li>${cap(e)}.</li>`).join("")}</ul>
+      </div>
+
+      <div class="traits">
+        <h3>Your profile</h3>
+        ${traits.map(t => `
+          <div class="trait">
+            <div class="trait-row"><span>${t.label}</span><span>${t.pct}</span></div>
+            <div class="bar"><i data-pct="${t.pct}"></i></div>
+          </div>`).join("")}
+      </div>
+
+      <div class="foot">
+        <button class="btn btn-ghost" id="again">Take it again &mdash; all new questions</button>
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => {
+    app.querySelectorAll(".bar i").forEach(b => { b.style.width = b.dataset.pct + "%"; });
+  });
+
+  document.getElementById("again").onclick = () => {
+    round = (round + 1) % QUESTION_SETS.length;
+    QUESTIONS = QUESTION_SETS[round];
+    calibrate();
+    answers = [];
+    step = 0;                     // straight into the new questions, no intro
+    window.scrollTo(0, 0);
+    render();
+  };
+}
+
+calibrate();
+render();
+</script>
+</body>
+</html>
