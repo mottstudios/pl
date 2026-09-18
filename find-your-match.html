@@ -122,7 +122,9 @@
     box-shadow: 0 10px 0 -4px rgba(0,255,135,0.25);
   }
 
-  .btn-go:hover { transform: translateY(-2px); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-go:hover { transform: translateY(-2px); }
+  }
   .btn-go:active { transform: translateY(1px); }
 
   .btn-ghost {
@@ -133,7 +135,9 @@
     padding: 13px 26px;
   }
 
-  .btn-ghost:hover { border-color: var(--pl-green); color: var(--pl-green); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-ghost:hover { border-color: var(--pl-green); color: var(--pl-green); }
+  }
 
   /* ---------- progress ---------- */
   .prog-row {
@@ -207,10 +211,20 @@
     transition: background .13s ease, border-color .13s ease, transform .13s ease;
   }
 
-  .opt:hover {
+  /* hover only where there is a real pointer: on touch the browser latches
+     :hover on the tapped element, and because each question re-renders into
+     the same slots the next screen's button looks already selected. */
+  @media (hover: hover) and (pointer: fine) {
+    .opt:hover {
+      background: rgba(0,255,135,0.09);
+      border-color: var(--pl-green);
+      transform: translateX(3px);
+    }
+  }
+
+  .opt:active {
     background: rgba(0,255,135,0.09);
     border-color: var(--pl-green);
-    transform: translateX(3px);
   }
 
   .opt .key {
@@ -226,7 +240,11 @@
     font-weight: 900;
   }
 
-  .opt:hover .key { background: var(--pl-green); color: #04231a; }
+  @media (hover: hover) and (pointer: fine) {
+    .opt:hover .key { background: var(--pl-green); color: #04231a; }
+  }
+
+  .opt:active .key { background: var(--pl-green); color: #04231a; }
 
   .back {
     appearance: none;
@@ -242,7 +260,9 @@
     padding: 18px 2px 0;
   }
 
-  .back:hover { color: #fff; }
+  @media (hover: hover) and (pointer: fine) {
+    .back:hover { color: #fff; }
+  }
 
   /* ---------- calculating ---------- */
   .calc { text-align: center; padding: 60px 0; }
@@ -977,6 +997,7 @@ function question() {
 
   app.querySelectorAll(".opt").forEach(b => {
     b.onclick = () => {
+      b.blur();                       // don't carry focus into the next screen
       answers[step] = +b.dataset.i;
       step++;
       render();
